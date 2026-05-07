@@ -1,0 +1,14 @@
+Cleaning file: Claude should generate a new excel file
+
+- Determine the newest date at which a number was updated for each property, then remove duplicates using the id column
+- Properties that contain in the tag "wrong_number" should have the status as Wrong Number as well
+- Each property will have a tag (new column) with this format "Skipped Month-YYYY" and will be linked to the NUMBER CREATED AT column
+- Property with blank or null in the STATUS column will be changed to "Unknown"
+- Properties with tag T1 or T1Skiptrace or Tier 1 should be T1 in the new file, T2Skiptrace or T2 will all be T2, T1.2 will all be T6, and blanks or null will be "Unknown" 
+
+
+
+
+ar
+
+
