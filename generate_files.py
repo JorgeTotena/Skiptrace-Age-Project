@@ -10,10 +10,10 @@ from openpyxl.utils import get_column_letter
 # Always operate relative to this script's directory so it works regardless of CWD.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-CLIENT_PREFIX = 'Noble Home - '
+CLIENT_PREFIX = 'Pillar Home Buyers - '
 INPUT_DIR = 'Input'
-PARQUET_FILE = os.path.join(INPUT_DIR, 'noblehome_numbers.parquet')
-SOURCE_CSV = os.path.join(INPUT_DIR, 'noblehome_properties.csv')
+PARQUET_FILE = os.path.join(INPUT_DIR, 'pillarhomebuyers_numbers.parquet')
+SOURCE_CSV = os.path.join(INPUT_DIR, 'pillarhomebuyers_properties.csv')
 
 SOURCE_MAP = {
     # T1
@@ -62,7 +62,9 @@ def compile_or_load_parquet():
     if not os.path.exists(SOURCE_CSV):
         raise FileNotFoundError(f'Source CSV not found: {SOURCE_CSV}')
     print(f'Compiling {SOURCE_CSV} into parquet (first run)...')
-    df = pd.read_csv(SOURCE_CSV, dtype=str, low_memory=False)
+    with open(SOURCE_CSV, 'r', encoding='utf-8', errors='replace') as _f:
+        _sep = ';' if ';' in _f.readline() else ','
+    df = pd.read_csv(SOURCE_CSV, dtype=str, low_memory=False, sep=_sep)
     df.to_parquet(PARQUET_FILE, index=False)
     print(f'Saved {len(df):,} rows to {PARQUET_FILE}')
     return df
