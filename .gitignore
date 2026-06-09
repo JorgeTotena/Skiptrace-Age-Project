@@ -1,5 +1,21 @@
-Input/noblehome_numbers.parquet
-Input/noblehome_properties.csv
-Noble Home - Cleaning_File_All_Numbers.csv
-Noble Home - Cleaning_File_Deduped_545k.xlsx
-Noble Home - Numbers Age Import File.xlsx
+# --- Source data (large CSVs and parquet caches) ---
+input/*.csv
+input/*.parquet
+Input/*.csv
+Input/*.parquet
+
+# --- Processing outputs (large per-client data files) ---
+# Reports/ are intentionally tracked; only the bulky cleaning/import files are ignored.
+Processing/**/*.csv
+Processing/**/*.xlsx
+Processing/**/*.parquet
+
+# Stray root-level client outputs (older runs wrote here before folder organization)
+*Cleaning_File_All_Numbers.csv
+*Cleaning_File_Deduped_*.xlsx
+*Numbers Age Import File.xlsx
+
+# --- Editor / OS / Python noise ---
+~$*
+__pycache__/
+*.pyc
