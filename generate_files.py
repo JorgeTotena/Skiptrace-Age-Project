@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import textwrap
 
 import pandas as pd
@@ -10,10 +11,10 @@ from openpyxl.utils import get_column_letter
 # Always operate relative to this script's directory so it works regardless of CWD.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-CLIENT_PREFIX = 'Pillar Home Buyers - '
+CLIENT_PREFIX = 'Leave the Key - '
 INPUT_DIR = 'Input'
-PARQUET_FILE = os.path.join(INPUT_DIR, 'pillarhomebuyers_numbers.parquet')
-SOURCE_CSV = os.path.join(INPUT_DIR, 'pillarhomebuyers_properties.csv')
+PARQUET_FILE = os.path.join(INPUT_DIR, 'leavethekey_numbers.parquet')
+SOURCE_CSV = os.path.join(INPUT_DIR, 'leavethekey_numbers_2026-05-14.csv')
 
 SOURCE_MAP = {
     # T1
@@ -23,27 +24,61 @@ SOURCE_MAP = {
     'Tier 1': 'T1',
     'IDI': 'T1',
     'New source Launchskip': 'T1',
+    'SkipGenie': 'T1',  # Leave the Key
     # T2
     'T2Skiptrace': 'T2',
     'T2': 'T2',
     'SkipForce': 'T2',
+    'Skipforce': 'T2',  # casing variant (Leave the Key)
     # T3 (Batch/Skip)
     'Tier 3': 'T3',
     'Tier3': 'T3',
     'T3': 'T3',
+    'BatchSkip': 'T3',  # Leave the Key
     # T6
     'T1.2': 'T6',
     'T6': 'T6',
     # T8
     'T8': 'T8',
+    # Client-tracked source kept as its own category (Leave the Key)
+    'ReiSift': 'ReiSift',
+    'REISift': 'ReiSift',
     # Low-volume providers grouped
     'Locate Plus': 'Others',
     'Lead Sherpa': 'Others',
+    'Zillow': 'Others',
+    'CallRail': 'Others',
+    'PropStream': 'Others',
+    '1': 'Others',
 }
 
 # Dynamic: taken at script run time so age buckets always reflect "today".
 TODAY = pd.Timestamp.today().normalize()
 BUCKET_ORDER = ['<1 year', '1-2 years', '2+ years']
+
+# Earliest plausible NUMBER CREATED AT per tier. Rows dated before a tier's floor
+# cannot have come from that tier; if the source data claims they did (directly or
+# via accumulated TAGS), we re-resolve them.
+TIER_FLOOR = {
+    'T3': pd.Timestamp('2025-04-01'),
+    'T6': pd.Timestamp('2025-12-01'),
+    'T8': pd.Timestamp('2026-03-01'),
+}
+
+
+def tier_allowed_on(tier, created_at):
+    floor = TIER_FLOOR.get(tier)
+    if floor is None or pd.isna(created_at):
+        return True
+    return created_at >= floor
+
+
+def tier_launch_phrase(tiers):
+    """E.g. ['T6', 'T8'] -> 'T6 in December 2025 and T8 in March 2026'."""
+    parts = [f'{t} in {TIER_FLOOR[t].strftime("%B %Y")}' for t in tiers if t in TIER_FLOOR]
+    if len(parts) <= 1:
+        return parts[0] if parts else ''
+    return ', '.join(parts[:-1]) + ' and ' + parts[-1]
 
 # Cleaning_File_All_Numbers is CSV (Cava has 3M+ rows, exceeds the Excel sheet cap).
 ALL_FILE = f'{CLIENT_PREFIX}Cleaning_File_All_Numbers.csv'
@@ -76,25 +111,55 @@ def dedup_output_name(n_rows):
     return f'{CLIENT_PREFIX}Cleaning_File_Deduped_{n_k}k.xlsx'
 
 
-def source_from_tag_string(tags):
+def source_from_tag_string(tags, created_at=None):
     """Recover a tier from the TAGS column when the SOURCE cell is blank.
-    Order matters: T1.2 must win over T1 (substring), specific tiers before T1."""
+    Order matters: T1.2 must win over T1 (substring), specific tiers before T1.
+    TAGS in the CRM accumulates over time, so an old row can carry a newer tier's
+    tag that wasn't its real origin. tier_allowed_on() blocks those mis-matches
+    and lets the scan fall through to an older tier that fits the row's date."""
     if not isinstance(tags, str) or not tags.strip():
         return None
     s = tags.lower()
-    if 't1.2' in s:
+    if 't1.2' in s and tier_allowed_on('T6', created_at):
         return 'T6'
-    if 't8' in s:
+    if 't8' in s and tier_allowed_on('T8', created_at):
         return 'T8'
-    if 't6' in s:
+    if 't6' in s and tier_allowed_on('T6', created_at):
         return 'T6'
-    if 'tier 3' in s or 't3' in s:
+    if ('tier 3' in s or 't3' in s) and tier_allowed_on('T3', created_at):
         return 'T3'
     if 't2' in s:
         return 'T2'
     if 't1' in s or 'tier 1' in s or 'tier1' in s:
         return 'T1'
     return None
+
+
+# Re-Skipped tag: when a property has been re-skiptraced, its TAGS column carries
+# "Re-Skipped YYYY-MM". That month becomes the property's effective NUMBER CREATED AT,
+# because the fresher contact data is what calling teams will actually use.
+RESKIP_RE = re.compile(r'Re-?Skipped\s+(\d{4})-(\d{1,2})', re.IGNORECASE)
+
+
+def extract_reskip_month(tags):
+    if not isinstance(tags, str):
+        return None
+    m = RESKIP_RE.search(tags)
+    if not m:
+        return None
+    return pd.Timestamp(year=int(m.group(1)), month=int(m.group(2)), day=1)
+
+
+def apply_reskip_override(df):
+    """For rows whose TAGS contain Re-Skipped YYYY-MM, overwrite NUMBER CREATED AT to
+    YYYY-MM-01 and recompute Skipped Month-YYYY. Returns (new_df, mask_of_overridden)."""
+    df = df.copy()
+    reskip_dates = df['TAGS'].apply(extract_reskip_month)
+    mask = reskip_dates.notna()
+    if mask.any():
+        df.loc[mask, 'NUMBER CREATED AT'] = pd.to_datetime(reskip_dates[mask])
+        df.loc[mask, 'Skipped Month-YYYY'] = 'Skipped ' + reskip_dates[mask].dt.strftime('%Y-%m')
+    return df, mask
 
 
 def age_bucket(years):
@@ -116,10 +181,28 @@ def clean(df):
     df['STATUS'] = df['STATUS'].fillna('Unknown')
     df.loc[df['STATUS'].astype(str).str.strip() == '', 'STATUS'] = 'Unknown'
 
+    # Effective skip date for source attribution: a Re-Skipped YYYY-MM tag tells us
+    # the property was re-skiptraced on that month, so the tier floor must use the
+    # later of (raw NUMBER CREATED AT, Re-Skipped date) — otherwise a legit 2026 T6
+    # re-skip on an old 2023 row would get invalidated just because the raw date
+    # column hasn't been bumped yet (the bump happens later in apply_reskip_override).
+    reskip_dates = df['TAGS'].apply(extract_reskip_month)
+    effective_date = df['NUMBER CREATED AT'].copy()
+    later = reskip_dates.notna() & (reskip_dates > effective_date.fillna(pd.Timestamp.min))
+    effective_date.loc[later] = reskip_dates[later]
+
     mapped = df['SOURCE'].map(SOURCE_MAP)
+    # Date-floor guard: a row dated before a tier's launch cannot be that tier,
+    # even if the source CSV says so. Invalidate and let TAGS backfill re-resolve.
+    for tier, floor in TIER_FLOOR.items():
+        invalid = (mapped == tier) & effective_date.notna() & (effective_date < floor)
+        if invalid.any():
+            mapped.loc[invalid] = pd.NA
     needs_backfill = mapped.isna()
     if needs_backfill.any():
-        mapped.loc[needs_backfill] = df.loc[needs_backfill, 'TAGS'].apply(source_from_tag_string)
+        mapped.loc[needs_backfill] = df.loc[needs_backfill].apply(
+            lambda r: source_from_tag_string(r['TAGS'], effective_date.loc[r.name]), axis=1
+        )
     df['SOURCE'] = mapped.fillna('Unknown')
 
     df['Skipped Month-YYYY'] = 'Skipped ' + df['NUMBER CREATED AT'].dt.strftime('%Y-%m')
@@ -272,12 +355,28 @@ print(f'All Numbers: {len(df):,} rows saved to {ALL_FILE}')
 # Dedup: one row per property (FOLIO+ADDRESS+ZIP) keeping OLDEST NUMBER CREATED AT
 df_sorted = df.sort_values('NUMBER CREATED AT', ascending=True, kind='mergesort')
 df_dedup = df_sorted.drop_duplicates(subset=['_property_key'], keep='first').sort_index()
+
+# Property-level Re-Skipped override: if the deduped row carries a Re-Skipped YYYY-MM tag,
+# treat that month as the property's effective skip date. Drives reports + import file.
+df_dedup, reskip_mask = apply_reskip_override(df_dedup)
+client_has_reskip = bool(reskip_mask.any())
+if client_has_reskip:
+    print(f'Re-Skipped tag detected on {int(reskip_mask.sum()):,} properties — '
+          f'dates overridden, import file restricted to age < 1 year.')
+
 DEDUP_FILE = dedup_output_name(len(df_dedup))
 df_dedup.drop(columns=INTERNAL_COLS).to_excel(DEDUP_FILE, index=False)
 print(f'Deduped (oldest per property): {len(df_dedup):,} rows saved to {DEDUP_FILE}')
 
-# Import file: folio, address, zip + tag (the Skipped YYYY-MM value from the deduped row)
-df_import = df_dedup[['FOLIO', 'ADDRESS', 'ZIP', 'Skipped Month-YYYY']].rename(
+# Import file: folio, address, zip + tag (the Skipped YYYY-MM value from the deduped row).
+# When the client has been through this process before (Re-Skipped tags present), exclude
+# anything 1+ year old — those properties were already tagged in 8020rei domain on the
+# prior iteration and don't need to be re-imported.
+df_import_src = df_dedup
+if client_has_reskip:
+    age_years_import = (TODAY - df_dedup['NUMBER CREATED AT']).dt.days / 365.25
+    df_import_src = df_dedup[age_years_import < 1]
+df_import = df_import_src[['FOLIO', 'ADDRESS', 'ZIP', 'Skipped Month-YYYY']].rename(
     columns={'FOLIO': 'folio', 'ADDRESS': 'address', 'ZIP': 'zip', 'Skipped Month-YYYY': 'tag'}
 )
 df_import.to_excel(IMPORT_FILE, index=False)
@@ -288,6 +387,7 @@ print(f'Import file: {len(df_import):,} rows saved to {IMPORT_FILE}')
 wn_rows = df[df['_is_wrong_number']].copy()
 wn_sorted = wn_rows.sort_values('NUMBER CREATED AT', ascending=True, kind='mergesort')
 wn_dedup = wn_sorted.drop_duplicates(subset=['_property_key'], keep='first')
+wn_dedup, _ = apply_reskip_override(wn_dedup)
 wn_age, wn_sxa, _ = build_breakdowns(wn_dedup)
 
 # Full portfolio view = the entire deduped dataset (one row per property).
@@ -345,9 +445,9 @@ def build_full_portfolio_sheet(ws, include_sources):
         t8_count = int(full_sxa.loc['T8', 'Total']) if 'T8' in full_sxa.index else 0
         insights = [
             f'1. Portfolio of {total_properties:,} properties. {over1_full:,} ({over1_full/total_properties*100:.1f}%) have data 1+ years old; {over2_full:,} ({over2_full/total_properties*100:.1f}%) are 2+ years old. Older data tends to lower connect rates.',
-            f'2. T1 dominates at {t1_count:,} properties ({t1_share:.1f}%). This reflects sourcing history: T1 and T2 were used in prior years, while T6 and T8 were introduced in 2026, so T1 carries the oldest data.',
+            f'2. T1 dominates at {t1_count:,} properties ({t1_share:.1f}%). This reflects sourcing history: T1 and T2 are the long-standing tiers, while newer tiers launched later ({tier_launch_phrase(["T3", "T6", "T8"])}), so T1 carries the oldest data.',
             f'3. The {t1_2plus:,} T1 records that are 2+ years old are the most likely driver of softer contact results on this cohort — phone numbers gathered that long ago have had the most time to go stale.',
-            f'4. T6 ({t6_count:,}) and T8 ({t8_count:,}) were added this year and show the expected fresh-data profile. Treat them as the higher-intent cohort in active calling queues.',
+            f'4. T6 ({t6_count:,}, launched {TIER_FLOOR["T6"].strftime("%B %Y")}) and T8 ({t8_count:,}, launched {TIER_FLOOR["T8"].strftime("%B %Y")}) show the expected fresh-data profile. Treat them as the higher-intent cohort in active calling queues.',
             '5. Recommended action: prioritize a re-skiptrace of T1 records that are 2+ years old. Largest cohort and most likely to yield recovered contacts from a fresh pull.',
         ]
     else:
@@ -371,11 +471,24 @@ def build_wrong_numbers_sheet(ws, include_sources):
     write_title(ws, r, 'Skiptrace Numbers — Wrong-Number Analysis', COLS); r += 1
     write_note(ws, r, 'Properties with at least one phone number flagged as a wrong number · One record per property', COLS, MERGED_WIDTH); r += 2
 
+    if wn_properties == 0:
+        write_section(ws, r, 'Summary', COLS); r += 1
+        set_row(ws, r, ['Wrong-number properties', 0], border=True); r += 2
+        write_insight(ws, r,
+            f'No properties in this portfolio carry a wrong-number flag (STATUS = "Wrong Number"). '
+            f'Reviewed {total_properties:,} deduped properties.',
+            COLS, MERGED_WIDTH)
+        ws.freeze_panes = 'A4'
+        return
+
+    pct_over1 = over1_wn / wn_properties * 100
+    pct_over2 = over2_wn / wn_properties * 100
+
     write_section(ws, r, 'Summary', COLS); r += 1
     set_row(ws, r, ['Wrong-number properties', wn_properties], border=True); r += 1
     set_row(ws, r, ['Share of portfolio', f'{wn_rate:.2f}%  ({wn_properties:,} of {total_properties:,})'], border=True); r += 1
-    set_row(ws, r, ['With data 1+ years old', f'{over1_wn:,}  ({over1_wn/wn_properties*100:.1f}%)'], border=True); r += 1
-    set_row(ws, r, ['With data 2+ years old', f'{over2_wn:,}  ({over2_wn/wn_properties*100:.1f}%)'], border=True); r += 2
+    set_row(ws, r, ['With data 1+ years old', f'{over1_wn:,}  ({pct_over1:.1f}%)'], border=True); r += 1
+    set_row(ws, r, ['With data 2+ years old', f'{over2_wn:,}  ({pct_over2:.1f}%)'], border=True); r += 2
 
     write_section(ws, r, 'Data age distribution (wrong-number properties)', COLS); r += 1
     write_note(ws, r, 'Older data is more likely to reflect stale numbers that a fresh skiptrace can recover.', COLS, MERGED_WIDTH); r += 1
@@ -396,7 +509,7 @@ def build_wrong_numbers_sheet(ws, include_sources):
         insights = [
             f'1. Volume: {wn_properties:,} wrong-number properties ({wn_rate:.2f}% of the original portfolio). Manageable scale, but worth addressing to protect caller productivity.',
             f'2. Age profile: {over1_wn:,} of {wn_properties:,} ({over1_wn/wn_properties*100:.1f}%) have data 1+ years old. Stale data is the likely root cause; a fresh skiptrace should recover usable numbers for most.',
-            f'3. T1 drives wrong numbers ({wn_t1:,} of {wn_properties:,}, {wn_t1_share:.1f}%). Consistent with T1 being the longest-standing tier — used in prior years before T6 and T8 were added in 2026 — so its data has had the most time to go stale.',
+            f'3. T1 drives wrong numbers ({wn_t1:,} of {wn_properties:,}, {wn_t1_share:.1f}%). Consistent with T1 being the longest-standing tier — newer tiers launched later ({tier_launch_phrase(["T3", "T6", "T8"])}) — so T1 data has had the most time to go stale.',
             f'4. Recent wrong numbers (<1 year): {wn_recent:,}. Less likely to be fixed by re-skiptracing; worth reviewing at the originating source for data quality.',
             '5. Suggested workflow: (a) exclude wrong-number properties from active calling queues, (b) submit the 1+ year cohort to a fresh skiptrace, (c) re-ingest returned numbers and recycle into the dialer.',
         ]
