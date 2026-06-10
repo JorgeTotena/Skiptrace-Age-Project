@@ -356,87 +356,81 @@
     "ext_total": 499585
   },
   "Kentucky Real Estate": {
-    "total": 12107,
-    "one_plus_count": 8588,
-    "one_plus_pct": 70.9,
-    "two_plus_count": 5505,
-    "two_plus_pct": 45.5,
+    "total": 103802,
+    "one_plus_count": 78572,
+    "one_plus_pct": 75.7,
+    "two_plus_count": 51847,
+    "two_plus_pct": 49.9,
     "age_dist": {
-      "<1 year": 3519,
-      "1-2 years": 3083,
-      "2+ years": 5505
+      "<1 year": 25230,
+      "1-2 years": 26725,
+      "2+ years": 51847
     },
     "wrong_count": 770,
-    "wrong_share_pct": 5.98,
+    "wrong_share_pct": 0.74,
     "wrong_age_dist": {
-      "<1 year": 150,
-      "1-2 years": 239,
-      "2+ years": 381
+      "<1 year": 770,
+      "1-2 years": 0,
+      "2+ years": 0
     },
     "meta": {
-      "generated": "2026-04-21",
+      "generated": "2026-06-09",
       "range_start": "2023-06-22",
       "range_end": "2026-04-17"
     },
     "source_full": {
       "T1": {
-        "<1 year": 203,
-        "1-2 years": 2491,
-        "2+ years": 5427,
-        "Total": 8121
-      },
-      "Unknown": {
-        "<1 year": 1419,
-        "1-2 years": 592,
-        "2+ years": 0,
-        "Total": 2011
-      },
-      "T6": {
-        "<1 year": 1320,
-        "1-2 years": 0,
-        "2+ years": 0,
-        "Total": 1320
+        "<1 year": 10784,
+        "1-2 years": 26725,
+        "2+ years": 51062,
+        "Total": 88571
       },
       "T8": {
-        "<1 year": 574,
+        "<1 year": 7989,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 574
+        "Total": 7989
+      },
+      "T6": {
+        "<1 year": 6430,
+        "1-2 years": 0,
+        "2+ years": 0,
+        "Total": 6430
       },
       "T2": {
-        "<1 year": 3,
+        "<1 year": 11,
         "1-2 years": 0,
-        "2+ years": 78,
-        "Total": 81
+        "2+ years": 785,
+        "Total": 796
+      },
+      "Unknown": {
+        "<1 year": 16,
+        "1-2 years": 0,
+        "2+ years": 0,
+        "Total": 16
       }
     },
     "source_wrong": {
       "T1": {
-        "<1 year": 14,
-        "1-2 years": 203,
-        "2+ years": 375,
-        "Total": 592
-      },
-      "Unknown": {
-        "<1 year": 86,
-        "1-2 years": 36,
+        "<1 year": 689,
+        "1-2 years": 0,
         "2+ years": 0,
-        "Total": 122
+        "Total": 689
       },
       "T6": {
-        "<1 year": 50,
+        "<1 year": 76,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 50
+        "Total": 76
       },
       "T2": {
-        "<1 year": 0,
+        "<1 year": 5,
         "1-2 years": 0,
-        "2+ years": 6,
-        "Total": 6
+        "2+ years": 0,
+        "Total": 5
       }
     },
-    "ext_total": 12107
+    "ext_total": 103802
   },
   "Leave the Key": {
     "total": 141935,
@@ -457,84 +451,96 @@
       "2+ years": 8608
     },
     "meta": {
-      "generated": "2026-05-26",
+      "generated": "2026-06-09",
       "range_start": "2020-04-10",
       "range_end": "2026-05-12"
     },
     "source_full": {
       "T1": {
-        "<1 year": 19766,
+        "<1 year": 18511,
         "1-2 years": 12382,
-        "2+ years": 66276,
-        "Total": 98424
-      },
-      "Unknown": {
-        "<1 year": 13629,
-        "1-2 years": 137,
-        "2+ years": 2720,
-        "Total": 16486
+        "2+ years": 66371,
+        "Total": 97264
       },
       "T3": {
-        "<1 year": 13124,
+        "<1 year": 13157,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 13124
+        "Total": 13157
+      },
+      "Unknown": {
+        "<1 year": 8522,
+        "1-2 years": 137,
+        "2+ years": 2222,
+        "Total": 10881
       },
       "T2": {
-        "<1 year": 4702,
+        "<1 year": 2100,
         "1-2 years": 35,
-        "2+ years": 8265,
-        "Total": 13002
+        "2+ years": 8605,
+        "Total": 10740
       },
-      "Others": {
-        "<1 year": 210,
-        "1-2 years": 1,
-        "2+ years": 426,
-        "Total": 637
-      },
-      "T6": {
-        "<1 year": 262,
+      "ReiSift": {
+        "<1 year": 9098,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 262
+        "Total": 9098
+      },
+      "Others": {
+        "<1 year": 215,
+        "1-2 years": 1,
+        "2+ years": 489,
+        "Total": 705
+      },
+      "T6": {
+        "<1 year": 90,
+        "1-2 years": 0,
+        "2+ years": 0,
+        "Total": 90
       }
     },
     "source_wrong": {
       "T1": {
-        "<1 year": 6417,
-        "1-2 years": 1599,
-        "2+ years": 6799,
-        "Total": 14815
+        "<1 year": 5715,
+        "1-2 years": 1598,
+        "2+ years": 6817,
+        "Total": 14130
       },
       "Unknown": {
-        "<1 year": 7007,
-        "1-2 years": 115,
-        "2+ years": 736,
-        "Total": 7858
+        "<1 year": 6522,
+        "1-2 years": 114,
+        "2+ years": 388,
+        "Total": 7024
       },
-      "T2": {
-        "<1 year": 2137,
-        "1-2 years": 111,
-        "2+ years": 837,
-        "Total": 3085
+      "ReiSift": {
+        "<1 year": 2388,
+        "1-2 years": 0,
+        "2+ years": 0,
+        "Total": 2388
       },
       "T3": {
-        "<1 year": 2225,
+        "<1 year": 2234,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 2225
+        "Total": 2234
+      },
+      "T2": {
+        "<1 year": 923,
+        "1-2 years": 113,
+        "2+ years": 1163,
+        "Total": 2199
       },
       "Others": {
-        "<1 year": 124,
+        "<1 year": 129,
         "1-2 years": 14,
-        "2+ years": 236,
-        "Total": 374
+        "2+ years": 240,
+        "Total": 383
       },
       "T6": {
-        "<1 year": 19,
+        "<1 year": 18,
         "1-2 years": 0,
         "2+ years": 0,
-        "Total": 19
+        "Total": 18
       }
     },
     "ext_total": 141935

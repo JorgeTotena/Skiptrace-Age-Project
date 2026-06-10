@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Skiptrace Refresh — Internal CSM Playbook</title>
+<style>
+  @page { size: letter landscape; margin: 0.4in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; color: #2b2b2b; background: #eef2f6; padding: 24px; }
+  .wrap { max-width: 1150px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 30px 34px; }
+  .tag { font-size: 12px; letter-spacing: 2px; color: #C0504D; font-weight: 700; text-transform: uppercase; }
+  h1 { font-size: 26px; color: #1F4E78; margin: 4px 0 2px; }
+  .sub { font-size: 13px; color: #888; margin-bottom: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: #1F4E78; color: #fff; text-align: left; padding: 9px 10px; font-weight: 600; }
+  td { padding: 9px 10px; border-bottom: 1px solid #eef0f2; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .rank { font-weight: 800; color: #1F4E78; text-align: center; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 11px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .u-high { background: #C0504D; } .u-med { background: #E0A93B; } .u-low { background: #2E9E5B; } .u-x { background: #888; }
+  .hs { font-weight: 700; }
+  .hs1 { color: #C0504D; } .hs2 { color: #D9803B; } .hs3 { color: #C9A227; } .hs4 { color: #2E9E5B; }
+  .stale { font-weight: 700; }
+  .talk { color: #444; }
+  .legend { font-size: 11px; color: #777; margin-top: 14px; line-height: 1.6; }
+  .banner { display: flex; gap: 14px; margin: 4px 0 18px; }
+  .bitem { flex: 1; border-radius: 8px; padding: 12px 16px; border: 1px solid #e3e9ef; }
+  .bitem .bv { font-size: 22px; font-weight: 800; }
+  .bitem .bl { font-size: 11px; color: #666; margin-top: 3px; line-height: 1.4; }
+  .bitem .bl span { color: #999; }
+  .bitem.risk { background: #fdf3f2; border-color: #f0c4c0; } .bitem.risk .bv { color: #C0504D; }
+  .bitem.lost { background: #f4f4f4; } .bitem.lost .bv { color: #888; }
+  .bitem.ok { background: #f1f8f3; border-color: #cfe6d6; } .bitem.ok .bv { color: #2E9E5B; }
+  .mrr { font-weight: 700; white-space: nowrap; }
+  .mrr.risk { color: #C0504D; } .mrr.risk span { font-size: 10px; font-weight: 600; }
+  .mrr.lost { color: #999; text-decoration: line-through; } .mrr.lost span { font-size: 10px; text-decoration: none; color: #aaa; }
+</style></head><body>
+<div class="wrap">
+  <div class="tag">Internal · Not for client distribution</div>
+  <h1>Skiptrace Refresh — CSM Playbook</h1>
+  <div class="sub">Who to call first, why, and the one-line talking point · Prepared 2026-06-09 · Blends contact-data staleness, wrong-number rate, and CS health score</div>
+  <div class="banner"><div class="bitem risk"><div class="bv">$18,737/mo</div><div class="bl">MRR at risk · 7 accounts (health ≤ At Risk)<br><span>≈ $224,848/yr exposed</span></div></div><div class="bitem lost"><div class="bv">$1,890/mo</div><div class="bl">Already lost · 1 canceled<br><span>≈ $22,680/yr · win-back</span></div></div><div class="bitem ok"><div class="bv">$5,245/mo</div><div class="bl">Stable · 2 healthy accounts</div></div></div>
+  <table>
+    <thead><tr><th>#</th><th>Client</th><th>CSM</th><th>Health</th><th>MRR</th><th>1+ yr data</th><th>2+ yr data</th><th>Wrong #</th><th>Urgency</th><th>Talking point (client-safe)</th></tr></thead>
+    <tbody><tr><td class="rank">1</td><td><b>Patriot Home Buyers</b><br><span style="color:#999">613,429 props</span></td><td>Lauren Oxman</td><td class="hs hs1">1 · Critical</td><td class="mrr risk">$2,276/mo<br><span>at risk</span></td><td class="stale" style="color:#C0504D">96.9%</td><td class="stale" style="color:#C0504D">69.5%</td><td>none captured</td><td><span class="pill u-high">High</span></td><td class="talk">"70% of your numbers are 2+ yrs old — let's refresh the oldest 426,576." <b>At-risk account — pair with the retention play.</b></td></tr><tr><td class="rank">2</td><td><b>Leave the Key</b><br><span style="color:#999">141,935 props</span></td><td>Victoria Solis</td><td class="hs hs3">3 · At Risk</td><td class="mrr risk">$1,288/mo<br><span>at risk</span></td><td class="stale">63.6%</td><td class="stale" style="color:#C0504D">54.7%</td><td style="color:#C0504D">20.0%</td><td><span class="pill u-high">High</span></td><td class="talk">"20% of your numbers are flagged wrong — a cleanup is the fastest win." Plus 55% is 2+ yrs old — cleanup + refresh together.</td></tr><tr><td class="rank">3</td><td><b>Cava</b><br><span style="color:#999">499,585 props</span></td><td>Victoria Solis</td><td class="hs hs3">3 · At Risk</td><td class="mrr risk">$1,416/mo<br><span>at risk</span></td><td class="stale" style="color:#C0504D">90.8%</td><td class="stale" style="color:#C0504D">52.5%</td><td style="color:#D9803B">10.3%</td><td><span class="pill u-high">High</span></td><td class="talk">"52% of your numbers are 2+ yrs old — let's refresh the oldest 262,110."</td></tr><tr><td class="rank">4</td><td><b>Rapid Fire HB</b><br><span style="color:#999">653,585 props</span></td><td>Victoria Solis</td><td class="hs hs3">3 · At Risk</td><td class="mrr risk">$6,470/mo<br><span>at risk</span></td><td class="stale" style="color:#D9803B">89.6%</td><td class="stale" style="color:#C0504D">44.2%</td><td>none captured</td><td><span class="pill u-high">High</span></td><td class="talk">"44% of your numbers are 2+ yrs old — let's refresh the oldest 288,873."</td></tr><tr><td class="rank">5</td><td><b>Kentucky Real Estate</b><br><span style="color:#999">103,802 props</span></td><td>Victoria Solis</td><td class="hs hs4">4 · Healthy</td><td class="mrr">$2,225/mo</td><td class="stale">75.7%</td><td class="stale" style="color:#C0504D">49.9%</td><td>0.7%</td><td><span class="pill u-high">High</span></td><td class="talk">"50% of your numbers are 2+ yrs old — let's refresh the oldest 51,847."</td></tr><tr><td class="rank">6</td><td><b>Pillar Home Buyers</b><br><span style="color:#999">97,520 props</span></td><td>Victoria Solis</td><td class="hs hs3">3 · At Risk</td><td class="mrr risk">$1,607/mo<br><span>at risk</span></td><td class="stale">77.5%</td><td class="stale">0.0%</td><td style="color:#D9803B">11.2%</td><td><span class="pill u-med">Medium</span></td><td class="talk">"11% of your numbers are flagged wrong — a cleanup is the fastest win."</td></tr><tr><td class="rank">7</td><td><b>Noble Home</b><br><span style="color:#999">544,544 props</span></td><td>Victoria Solis</td><td class="hs hs4">4 · Healthy</td><td class="mrr">$3,020/mo</td><td class="stale" style="color:#D9803B">87.9%</td><td class="stale">9.1%</td><td>3.0%</td><td><span class="pill u-med">Medium</span></td><td class="talk">"429,088 numbers are about to cross the 2-yr mark — get ahead with a rolling refresh."</td></tr><tr><td class="rank">8</td><td><b>Atlas Property Investors</b><br><span style="color:#999">288,915 props</span></td><td>Lauren Oxman</td><td class="hs hs3">3 · At Risk</td><td class="mrr risk">$3,380/mo<br><span>at risk</span></td><td class="stale">32.9%</td><td class="stale">13.2%</td><td>1.6%</td><td><span class="pill u-med">Medium</span></td><td class="talk">"Freshest portfolio — maintain cadence; light refresh of the 38,049 oldest."</td></tr><tr><td class="rank">9</td><td><b>As Is Homebuyers</b><br><span style="color:#999">112,533 props</span></td><td>Andrea Castano</td><td class="hs hs2">2 · Poor</td><td class="mrr risk">$2,300/mo<br><span>at risk</span></td><td class="stale">54.5%</td><td class="stale">0.0%</td><td>2.3%</td><td><span class="pill u-low">Maintain</span></td><td class="talk">"Freshest portfolio — maintain cadence; light refresh of the 0 oldest." <b>At-risk account — pair with the retention play.</b></td></tr><tr><td class="rank">—</td><td><b>Vegas Cash Offers</b><br><span style="color:#999">137,793 props · Canceled</span></td><td>Victoria Solis</td><td class="hs hs1">1 · Critical</td><td class="mrr lost">$1,890/mo<br><span>lost</span></td><td class="stale">62.7%</td><td class="stale">0.0%</td><td>0.5%</td><td><span class="pill u-x">Win-back</span></td><td class="talk">Canceled. Data was clean &amp; fresh — a useful proof point in a win-back conversation.</td></tr></tbody>
+  </table>
+  <div class="legend">
+    <b>Health score:</b> 1 Critical · 2 Poor · 3 At Risk · 4 Healthy · 5 Thriving (8020REI AI CS score) &nbsp;|&nbsp;
+    <b>1+ yr data</b> = share older than 1 year (early aging) · <b>2+ yr data</b> = share older than 2 years (connect-rate drag) &nbsp;|&nbsp;
+    <b>Urgency</b> blends data staleness, wrong-number rate, and CS health (at-risk + stale = retention priority). &nbsp;|&nbsp;
+    <b>MRR at risk</b> = monthly revenue of accounts at health ≤ At Risk (churn-exposed); canceled = already lost.<br>
+    Each High/Medium client gets a client-facing one-page Health Card the CSM shares; this playbook stays internal.
+  </div>
+</div></body></html>
